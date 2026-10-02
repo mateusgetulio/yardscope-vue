@@ -1,5 +1,7 @@
 # YardScope
 
+This is the Vue 3 version of YardScope. The original React version is at [github.com/mateusgetulio/yardscope](https://github.com/mateusgetulio/yardscope).
+
 Turn a homeowner's sentence and two to four yard photos into a job a marketplace can price, correct and book, with a pre-visit brief for the pro.
 
 Instant pricing already works for services that can be measured from satellite imagery. YardScope explores the long tail that still needs someone to come and quote it. Not affiliated with any lawn-care or home-services company; rates are synthetic.
@@ -55,7 +57,7 @@ No authentication, payments, provider matching, scheduling, maps or notification
 
 ## How it was built
 
-Laravel 13 on PHP 8.4, Inertia with React 19 and TypeScript, Pest, Larastan at level 7, Pint, SQLite with four tables (requests, observation runs, correction records, pro actions). The scope is never stored: it is rebuilt from the latest observation plus the replayed corrections on every load. `app/Scoping` has no framework dependency, enforced by an architecture test.
+Laravel 13 on PHP 8.4, Inertia with Vue 3 and TypeScript, Pest, Larastan at level 7, Pint, SQLite with four tables (requests, observation runs, correction records, pro actions). The scope is never stored: it is rebuilt from the latest observation plus the replayed corrections on every load. `app/Scoping` has no framework dependency, enforced by an architecture test.
 
 Built with Claude Code over two days, every milestone reviewed by a separate reviewer agent against a frozen spec and fixed before merging. The extraction step has three drivers, chosen by `YARDSCOPE_EXTRACTOR`: `fixtures` (recorded answers keyed by photo bytes and sentence; the default, what tests and CI use), `api` (the Laravel AI SDK with `ANTHROPIC_API_KEY`), and `claude-code` (the same instructions and schema through the Claude Code CLI on the developer's own session). The Claude Code driver ran every live eval; the API driver was built against the SDK's fake and was not exercised against a provider, because no key was available. The SDK version used (0.11) has no `AgentFake` despite its docs; the fake is `Ai::fakeAgent()`.
 
