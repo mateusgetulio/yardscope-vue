@@ -19,6 +19,8 @@ const form = useForm<{ sentence: string; photos: File[] }>({
     photos: [],
 });
 const previews = ref<string[]>([]);
+const dragging = ref(false);
+const accepted = ['image/jpeg', 'image/png', 'image/webp'];
 
 watchEffect((onCleanup) => {
     const urls = previews.value;
@@ -33,6 +35,23 @@ function choosePhotos(files: File[]) {
 function onPhotosChange(event: Event) {
     const input = event.target as HTMLInputElement;
     choosePhotos(Array.from(input.files ?? []).slice(0, 4));
+}
+
+function onPhotosDrop(event: DragEvent) {
+    dragging.value = false;
+    const files = Array.from(event.dataTransfer?.files ?? []).filter((file) =>
+        accepted.includes(file.type),
+    );
+    if (files.length > 0) {
+        choosePhotos(files.slice(0, 4));
+    }
+}
+
+function onDragLeave(event: DragEvent) {
+    const zone = event.currentTarget as HTMLElement;
+    if (!zone.contains(event.relatedTarget as Node | null)) {
+        dragging.value = false;
+    }
 }
 
 const photoErrors = computed(() =>
@@ -111,7 +130,10 @@ function extractorNote(extractor: Props['extractor']): string {
                 </div>
                 <label
                     for="photos"
-                    class="mt-2 grid cursor-pointer grid-cols-2 gap-2 rounded-lg focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-600 sm:grid-cols-4"
+                    :class="`mt-2 grid cursor-pointer grid-cols-2 gap-2 rounded-lg focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-600 sm:grid-cols-4 ${dragging ? 'outline-2 outline-offset-2 outline-blue-600 outline-dashed' : ''}`"
+                    @dragover.prevent="dragging = true"
+                    @dragleave="onDragLeave"
+                    @drop.prevent="onPhotosDrop"
                 >
                     <template v-for="slot in [0, 1, 2, 3]" :key="slot">
                         <span v-if="previews[slot]" class="relative block">
@@ -147,8 +169,8 @@ function extractorNote(extractor: Props['extractor']): string {
                 <p class="mt-2 text-xs text-stone-500">
                     {{
                         previews.length > 0
-                            ? 'Click the photos to choose a different set. '
-                            : 'Choose all your photos at once. '
+                            ? 'Click or drop new photos to choose a different set. '
+                            : 'Choose or drop all your photos at once. '
                     }}Location data is removed from every photo.
                 </p>
                 <p
